@@ -1,0 +1,87 @@
+name: Terraform deployment to YC
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment for deployment to YC'
+        required: true
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+      approve:
+        description: 'Approve terraform apply'
+        type: choice
+        default: ""
+        options:
+          - "yes"
+          - "no"
+      destroy:
+        description: 'Cleanup with terraform destroy'
+        type: choice
+        default: "yes"
+        options:
+          - "yes"
+          - "no"
+
+jobs:
+  terraform:
+    name: 'Terraform ${{ github.event.inputs.action }} - ${{ github.event.inputs.environment }}'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    defaults:
+      run:
+        working-directory: Task2Advanced
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.14.0
+
+    - name: TF Init
+      run: |
+        cd envs/${{ github.event.inputs.environment }}
+        terraform init \
+          -backend-config="access_key=${{ secrets.YC_ACCESS_KEY_ID }}" \
+          -backend-config="secret_key=${{ secrets.YC_ACCESS_KEY_SECRET }}"
+
+    - name: TF Plan
+      run: |
+        cd envs/${{ github.event.inputs.environment }}
+        terraform plan \
+          -var-file="env.tfvars" \
+          -var="yandex_token=${{ secrets.YANDEX_TOKEN }}" \
+          -var="cloud_id=${{ secrets.YC_CLOUD_ID }}" \
+          -var="folder_id=${{ secrets.YC_FOLDER_ID }}" \
+          -var="subnet_id=${{ secrets.YC_SUBNET_ID }}" \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+    - name: TF Apply
+      if: ${{ github.event.inputs.approve == 'yes' }}
+      run: |
+        cd envs/${{ github.event.inputs.environment }}
+        terraform apply -auto-approve \
+          -var-file="env.tfvars" \
+          -var="yandex_token=${{ secrets.YANDEX_TOKEN }}" \
+          -var="cloud_id=${{ secrets.YC_CLOUD_ID }}" \
+          -var="folder_id=${{ secrets.YC_FOLDER_ID }}" \
+          -var="subnet_id=${{ secrets.YC_SUBNET_ID }}" \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+    - name: TF Destroy
+      if: ${{ github.event.inputs.destroy == 'yes' }}
+      run: |
+        cd envs/${{ github.event.inputs.environment }}
+        terraform destroy -auto-approve \
+          -var-file="env.tfvars" \
+          -var="yandex_token=${{ secrets.YANDEX_TOKEN }}" \
+          -var="cloud_id=${{ secrets.YC_CLOUD_ID }}" \
+          -var="folder_id=${{ secrets.YC_FOLDER_ID }}" \
+          -var="subnet_id=${{ secrets.YC_SUBNET_ID }}" \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
