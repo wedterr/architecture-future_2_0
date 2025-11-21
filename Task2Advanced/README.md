@@ -1,6 +1,7 @@
 # Интеграция с CI/CD и удалённым хранением состояния
 
 [Pipeline .yml](../.github/workflows/yc-terraform.yml)
+![alt text](./images/image.png)
 
 Инициализация terraform с указанием ключей к S3 backend.
 ```yml
@@ -53,3 +54,6 @@
       -var="subnet_id=${{ secrets.YC_SUBNET_ID }}" \
       -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
 ```
+![alt text](./images/image-1.png)
+
+![alt text](./images/image-2.png)
