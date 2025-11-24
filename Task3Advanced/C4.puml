@@ -1,0 +1,84 @@
+@startuml C4_Context_component
+!define C4P https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master
+!includeurl C4P/C4_Context.puml
+!includeurl C4P/C4_Container.puml
+!includeurl C4P/C4_Component.puml
+LAYOUT_WITH_LEGEND()
+
+title Целевая архитектура "Будущее 2.0"
+
+Person(user, "Сотрудники компании", "Пользователи веб-портала и BI")
+Person_Ext(client, "Клиенты", "Получает услуги")
+
+System_Boundary(s1, "IT-ландшафт Будущее 2.0") {
+Container(api_gateway, "API Gateway", "Kong", "Доступ к ИИ-сервисам и интеграция с другими системами")
+
+Container(medical_services, "Медицинские сервисы", "Python микросервисы с ИИ", "Обработка мед. данных и ИИ функции") {
+    Component(medical_data_management, "Обработка и хранение медицинских данных", "Хранение клиентов, диагнозов, историй болезней")
+    ComponentDb(medical_db, "База данных мед. данных", "SQL/NoSQL база с разделением схем по пациентам")
+    Component(ai_models, "ИИ-модели и алгоритмы", "Диагностические и прогностические задачи")
+    Component(business_logic, "Бизнес-логика", "Обслуживание клиентов и взаимодействие с оборудованием")
+}
+Container(fintech_services, "Финтех/банковские микросервисы", "Golang, Java", "Финансовые и банковские операции") {
+    Component(account_management, "Управление счетами и кредитами", "Обработка операций с счетами, кредитами, транзакциями")
+    Component(financial_reporting, "Финансовая отчетность и аналитика", "Генерация отчетов, интеграция с BI")
+    Component(external_integration, "Интеграция с внешними системами", "Связь с банковскими и платежными системами через API и события")
+    Component(security_compliance, "Безопасность и соответствие регуляторным требованиям", "KYC, AML, контроль доступа и аудит")
+}
+
+Container(data_lake_house, "Data Lake House", "Apache Iceberg") {
+    Component(raw_data_storage, "Хранение сырых данных", "Облако (S3)")
+    Component(etl_elt, "Компонент ETL/ELT", "Обработка и агрегация данных")
+    Component(data_quality_catalog, "Качество данных и каталогизация")
+    Component(near_real_time_analytics, "Аналитика в near-real-time", "Механизмы стриминга")
+}
+
+Container(data_showcase, "Витрина данных", "Отчеты без мед. карт/чувствительных данных", "Self-service BI слой") {
+    Component(etl_elt_processing, "ETL/ELT компоненты", "Обработка и трансформация данных")
+    Component(event_processing, "Компоненты обработки событий", "Обновление аналитики near-real-time")
+    Component(reporting, "Визуализация и генерация отчетов")
+    Component(data_integration, "Интеграция данных", "API и событийная шина")
+    Component(security, "Компоненты безопасности", "Контроль доступа и шифрование")
+}
+
+Container(self_portal, "Портал самообслуживания", "Self-service BI для сотрудников и клиентов", "Доступ к отчетам с фильтрацией по доступу и тд") {
+    Component(web_portal, "Портал самообслуживания", "React/Angular", "Инструменты визуализации и отчетности")
+    Component(bi_system, "BI-система", "Power BI / облачная BI", "Инструменты визуализации и отчетности")
+}
+
+Container(ai_services, "Платформа AI-сервисов")
+Container(pharm_services, "Платформа фармацевтики")
+Container(equip_services, "Платформа оборудования")
+
+ContainerQueue(event_platform, "Событийная платформа", "Apache Kafka", "Событийная интеграция доменов")
+}
+
+System_Ext(external_systems, "Внешние системы", "API")
+Rel(client, self_portal, "Получает услуги")
+Rel(user,self_portal, "Работает с системой")
+Rel(self_portal, api_gateway, "Строит отчёты")
+Rel(bi_system, data_showcase, "Доступ к витрине данных")
+Rel(medical_services, api_gateway, "")
+Rel(fintech_services, api_gateway, "")
+Rel(web_portal, data_showcase, "Запрашивает отчеты")
+Rel(data_lake_house, api_gateway, "Строит отчёты")
+Rel(event_platform, data_lake_house, "Публикует/подписывается на события")
+Rel(medical_services, event_platform, "Публикует/подписывается на события")
+Rel(fintech_services, event_platform, "Публикует/подписывается на события")
+Rel(ai_services, event_platform, "Публикует/подписывается на события")
+Rel(pharm_services, event_platform, "Публикует/подписывается на события")
+Rel(equip_services, event_platform, "Публикует/подписывается на события")
+Rel(medical_services, external_systems, "Получает результаты REST API")
+Rel(fintech_services, external_systems, "Проводит платежи (REST API")
+Rel(fintech_services, external_systems, "Отчётность (SFTP")
+Rel(medical_data_management, medical_db, "Читает/пишет")
+Rel(medical_data_management, ai_models, "Поставляет данные для обучения и предсказания")
+Rel(ai_models, business_logic, "Передает результаты ИИ для обработки")
+Rel(business_logic, api_gateway, "Обрабатывает внешние запросы через API")
+Rel(raw_data_storage, etl_elt, "Подаёт сырые данные для обработки")
+Rel(etl_elt, data_quality_catalog, "Подаёт чистые и агрегированные данные")
+Rel(etl_elt, near_real_time_analytics, "Обеспечивает стриминговые данные")
+Rel(data_quality_catalog, near_real_time_analytics, "Подаёт метаданные и данные качества")
+Rel(data_lake_house, data_showcase, "Поставляет агрегированные данные")
+
+@enduml

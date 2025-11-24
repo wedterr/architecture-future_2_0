@@ -1,0 +1,16 @@
+environment  = "stage"
+yandex_token = ""
+cloud_id     = ""
+folder_id    = ""
+subnet_id    = ""
+ssh_public_key = ""
+vm_name      = "stage-vm"
+vm_cores     = 2
+vm_core_fraction = 50
+vm_memory    = 1
+vm_disk_size = 20
+vm_disk_type = "network-ssd"
+image_family = "ubuntu-2204-lts"
+zone         = "ru-central1-b"
+platform_id  = "standard-v1"
+nat          = true

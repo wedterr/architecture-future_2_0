@@ -1,0 +1,80 @@
+@startuml Event_Storming
+
+skinparam rectangle {
+BackgroundColor<<bounded_context>> Wheat
+BackgroundColor<<shared_kernel>> LightSlateGray
+BackgroundColor<<external>> MistyRose
+BackgroundColor<<event>> LightGreen
+BackgroundColor<<kafka>> LightPink
+BackgroundColor<<subscriber>> LightCyan
+}
+
+title Cобытийная архитектура "Будущее 2.0"
+
+rectangle "Медицинский домен\nBounded Context: Patient Care" as medical_context <<bounded_context>>
+
+rectangle "Финтех домен\nBounded Context: Financial Services" as fintech_context <<bounded_context>>
+
+rectangle "AI-сервисы домен\nBounded Context: Intelligent Diagnostics" as ai_context <<bounded_context>>
+
+rectangle "Фармацевтический домен\nBounded Context: Pharmaceutical Management" as pharma_context <<bounded_context>>
+
+rectangle "Оборудование домен\nBounded Context: Medical Equipment" as equipment_context <<bounded_context>>
+
+rectangle "Платформа данных\nBounded Context: Data Platform" as data_context <<bounded_context>>
+
+rectangle "Портал самообслуживания\nBounded Context: Self-Service Analytics" as portal_context <<bounded_context>>
+
+rectangle "Apache Kafka\nEvent Bus\n\nТопики:\n- medical.events\n- fintech.events\n- ai.events\n- pharma.events\n- equipment.events\n- data.events\n- portal.events" as kafka_bus <<kafka>>
+
+rectangle "PatientRegistered\nСобытие: Регистрация пациента\nПолезная нагрузка:\n- patientId, personalInfo, contactInfo, registrationDate" as event_patient_registered <<event>>
+
+rectangle "CreditApproved\nСобытие: Кредит одобрен\nПолезная нагрузка:\n- creditId, customerId, amount, interestRate, term, conditions" as event_credit_approved <<event>>
+
+rectangle "DiagnosisCompleted\nСобытие: AI диагноз завершён\nПолезная нагрузка:\n- diagnosisId, patientId, condition, confidence, evidence, recommendations" as event_diagnosis_completed <<event>>
+
+rectangle "PrescriptionFilled\nСобытие: Рецепт выполнен\nПолезная нагрузка:\n- prescriptionId, patientId, medications, totalAmount" as event_prescription_filled <<event>>
+
+rectangle "EquipmentRegistered\nСобытие: Зарегестрировано оборудование\nПолезная нагрузка:\n- anomalyId, equipmentId, anomalyType, severity, recommendation" as event_equipment_registered <<event>>
+
+rectangle "DataProductCreated\nСобытие: Продукт данных создан\nПолезная нагрузка:\n- dataProductId, productName, domain, owner, schema, sla" as event_data_product_created <<event>>
+
+rectangle "ReportGenerated\nСобытие: Отчёт сгенерирован\nПолезная нагрузка:\n- reportId, reportName, ownerId, reportType, executionTime, fileSize" as event_report_generated <<event>>
+
+rectangle "Подписчики медицинских событий\n\n- Финтех домен\n- AI домен\n- Фармацевтический домен\n- Оборудование домен" as medical_subscribers <<subscriber>>
+
+rectangle "Подписчики финтех событий\n\n- Медицинский домен\n- Платформа данных\n- AI домен" as fintech_subscribers <<subscriber>>
+
+rectangle "Подписчики AI событий\n\n- Медицинский домен\n- Фармацевтический домен\n- Платформа данных" as ai_subscribers <<subscriber>>
+
+rectangle "Подписчики фармацевтических событий\n\n- Медицинский домен\n- Финтех домен\n- Платформа данных" as pharma_subscribers <<subscriber>>
+
+rectangle "Подписчики событий оборудования\n\n- Медицинский домен\n- Maintenance Service\n- Платформа данных" as equipment_subscribers <<subscriber>>
+
+rectangle "Подписчики событий платформы данных\n\n- Портал самообслуживания\n- Data Catalog\n- Все домены" as data_subscribers <<subscriber>>
+
+rectangle "Подписчики событий портала\n\n- Платформа данных\n- Security Service\n- Notification Service" as portal_subscribers <<subscriber>>
+
+medical_context -down-> event_patient_registered : Публикует
+fintech_context -down-> event_credit_approved : Публикует
+ai_context -down-> event_diagnosis_completed : Публикует
+pharma_context -down-> event_prescription_filled : Публикует
+equipment_context -down-> event_equipment_registered : Публикует
+data_context -down-> event_data_product_created : Публикует
+portal_context -down-> event_report_generated : Публикует
+event_patient_registered -down-> kafka_bus : В топик medical.events
+event_credit_approved -down-> kafka_bus : В топик fintech.events
+event_diagnosis_completed -down-> kafka_bus : В топик ai.events
+event_prescription_filled -down-> kafka_bus : В топик pharma.events
+event_equipment_registered -down-> kafka_bus : В топик equipment.events
+event_data_product_created -down-> kafka_bus : В топик data.events
+event_report_generated -down-> kafka_bus : В топик portal.events
+kafka_bus -down-> medical_subscribers : Подписка
+kafka_bus -down-> fintech_subscribers : Подписка
+kafka_bus -down-> ai_subscribers : Подписка
+kafka_bus -down-> pharma_subscribers : Подписка
+kafka_bus -down-> equipment_subscribers : Подписка
+kafka_bus -down-> data_subscribers : Подписка
+kafka_bus -down-> portal_subscribers : Подписка
+
+@enduml
