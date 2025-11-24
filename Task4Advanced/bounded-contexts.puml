@@ -1,0 +1,47 @@
+@startuml Bounded_Contexts
+
+skinparam rectangle {
+  BackgroundColor<<bounded_context>> Wheat
+  BackgroundColor<<shared_kernel>> LightSlateGray
+  BackgroundColor<<external>> MistyRose
+}
+
+title Bounded Contexts "Будущее 2.0"
+
+rectangle "Медицинский домен\nBounded Context:\nPatient Care\nЗадачи:\n- Управление пациентами\n- Запись на приёмы\n- Ведение лечения\n- Электронные медкарты" as medical_context <<bounded_context>>
+rectangle "Финтех домен\nBounded Context:\nFinancial Services\nЗадачи:\n- Управление счетами\n- Платежи и переводы\n- Кредиты\n- Проверка клиентов (KYC и AML)" as fintech_context <<bounded_context>>
+rectangle "AI-сервисы домен\nBounded Context:\nIntelligent Diagnostics\nЗадачи:\n- Помощь в диагнозах\n- Анализ снимков\n- Рекомендации по лечению\n- Прогнозы рисков" as ai_context <<bounded_context>>
+rectangle "Фармацевтический домен\nBounded Context:\nPharmaceutical Management\nЗадачи:\n- Каталог лекарств\n- Учет запасов\n- Обработка рецептов\n- Прогноз спроса" as pharma_context <<bounded_context>>
+rectangle "Оборудование домен\nBounded Context:\nMedical Equipment\nЗадачи:\n- Учет оборудования\n- Плановые проверки\n- Мониторинг состояния\n- Предсказание поломок" as equipment_context <<bounded_context>>
+rectangle "Платформа данных\nBounded Context:\nData Platform\nЗадачи:\n- Событийная шина\n- Data Lakehouse\n- Управление данными\n- Каталог метаданных" as data_context <<bounded_context>>
+rectangle "Портал самообслуживания\nBounded Context:\nSelf-Service Analytics\nЗадачи:\n- BI отчёты\n- Дашборды\n- Ад-хок запросы\n- Поиск данных" as portal_context <<bounded_context>>
+rectangle "Общие модели\nShared Kernel:\nОбщие сущности:\n- Пользователь\n- Организация\n- Аудит\n- Безопасность" as shared_kernel <<shared_kernel>>
+rectangle "External Systems" as external_systems <<external>>
+
+medical_context -down-> fintech_context : События по счетам и платежам
+fintech_context -down-> data_context : Финансовые события
+data_context -down-> portal_context : Данные для анализа
+
+medical_context -left-> ai_context : Медданные для AI
+ai_context -left-> data_context : ML метрики и результаты
+
+medical_context -up-> pharma_context : Рецепты и назначения
+pharma_context -up-> data_context : Фармацевтические данные
+
+medical_context -left-> equipment_context : Запросы по оборудованию
+equipment_context -left-> data_context : Телеметрия и метрики
+
+shared_kernel -right-> medical_context : Общие модели
+shared_kernel -right-> fintech_context : Общие модели
+shared_kernel -right-> ai_context : Общие модели
+shared_kernel -right-> pharma_context : Общие модели
+shared_kernel -right-> equipment_context : Общие модели
+shared_kernel -right-> data_context : Общие модели
+shared_kernel -right-> portal_context : Общие модели
+
+medical_context -left-> external_systems : Получение результатов анализов
+fintech_context -down-> external_systems :  Проведение платежей
+fintech_context -down-> external_systems :  Отчётность
+equipment_context -down-> external_systems : Интеграция с поставщиками
+
+@enduml
